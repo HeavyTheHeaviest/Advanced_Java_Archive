@@ -1,0 +1,35 @@
+<Configuration status="WARN">
+    <Appenders>
+        <RollingFile name="MonitorLog"
+                     fileName="logs/reminders.log"
+                     filePattern="logs/reminders-%d{yyyy-MM-dd}.log.gz">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1} - %m%n"/>
+            <Policies><TimeBasedTriggeringPolicy/></Policies>
+        </RollingFile>
+        <RollingFile name="EscalationLog"
+                     fileName="logs/escalations.log"
+                     filePattern="logs/escalations-%d{yyyy-MM-dd}.log.gz">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1} - %m%n"/>
+            <Policies><TimeBasedTriggeringPolicy/></Policies>
+        </RollingFile>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{HH:mm:ss} %-5p %c{1} - %m%n"/>
+        </Console>
+    </Appenders>
+
+    <Loggers>
+        <!-- konsola -->
+        <Root level="INFO">
+            <AppenderRef ref="Console"/>
+        </Root>
+
+        <!-- monity -->
+        <Logger name="MonitorLogger" level="INFO" additivity="false">
+            <AppenderRef ref="MonitorLog"/>
+        </Logger>
+        <!-- eskalacje -->
+        <Logger name="EscalationLogger" level="INFO" additivity="false">
+            <AppenderRef ref="EscalationLog"/>
+        </Logger>
+    </Loggers>
+</Configuration>

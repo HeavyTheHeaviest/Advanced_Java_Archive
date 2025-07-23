@@ -1,0 +1,396 @@
+openapi: 3.0.3
+info:
+  title: Internet Provider Service API
+  version: 1.0.0
+  description: |
+    REST API do zarządzania klientami, subskrypcjami, cennikiem,
+    fakturami i wpłatami dla dostawcy usług internetowych.
+servers:
+  - url: http://localhost:8080/api
+tags:
+  - name: Clients
+  - name: Subscriptions
+  - name: Subaccounts
+  - name: Prices
+  - name: Invoices
+  - name: Payments
+  - name: Billing
+  - name: Simulation
+
+components:
+  schemas:
+    SubscriptionType:
+      type: string
+      enum:
+        - BASIC
+        - PREMIUM
+        - SPORT
+        - MOVIES
+
+    ClientDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        firstName:
+          type: string
+        lastName:
+          type: string
+        clientNumber:
+          type: string
+      required:
+        - firstName
+        - lastName
+        - clientNumber
+
+    SubscriptionDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        clientId:
+          type: integer
+          format: int64
+        type:
+          $ref: '#/components/schemas/SubscriptionType'
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+      required:
+        - clientId
+        - type
+        - startDate
+
+    SubaccountDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        subscriptionId:
+          type: integer
+          format: int64
+        login:
+          type: string
+        password:
+          type: string
+      required:
+        - subscriptionId
+        - login
+        - password
+
+    PriceDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        type:
+          $ref: '#/components/schemas/SubscriptionType'
+        amount:
+          type: number
+          format: double
+        validFrom:
+          type: string
+          format: date
+        validTo:
+          type: string
+          format: date
+      required:
+        - type
+        - amount
+        - validFrom
+
+    InvoiceDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        subscriptionId:
+          type: integer
+          format: int64
+        dueDate:
+          type: string
+          format: date
+        amount:
+          type: number
+          format: double
+        paid:
+          type: boolean
+      required:
+        - subscriptionId
+        - dueDate
+        - amount
+
+    PaymentDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        subscriptionId:
+          type: integer
+          format: int64
+        paymentDate:
+          type: string
+          format: date
+        amount:
+          type: number
+          format: double
+      required:
+        - subscriptionId
+        - paymentDate
+        - amount
+
+paths:
+  /clients:
+    get:
+      tags: [Clients]
+      summary: Pobierz wszystkich klientów
+      responses:
+        '200':
+          description: Lista klientów
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ClientDTO'
+    post:
+      tags: [Clients]
+      summary: Dodaj nowego klienta
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientDTO'
+      responses:
+        '201':
+          description: Klient utworzony
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientDTO'
+
+  /clients/{id}:
+    get:
+      tags: [Clients]
+      summary: Pobierz klienta po ID
+      parameters:
+        - name: id
+          in: path
+          description: ID klienta
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Klient znaleziony
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientDTO'
+        '404':
+          description: Klient nie znaleziony
+
+  /subscriptions:
+    get:
+      tags: [Subscriptions]
+      summary: Pobierz wszystkie subskrypcje
+      responses:
+        '200':
+          description: Lista subskrypcji
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SubscriptionDTO'
+    post:
+      tags: [Subscriptions]
+      summary: Utwórz nową subskrypcję
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubscriptionDTO'
+      responses:
+        '201':
+          description: Subskrypcja utworzona
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionDTO'
+
+  /subscriptions/{id}:
+    get:
+      tags: [Subscriptions]
+      summary: Pobierz subskrypcję po ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Subskrypcja znaleziona
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionDTO'
+        '404':
+          description: Subskrypcja nie znaleziona
+
+  /subaccounts:
+    get:
+      tags: [Subaccounts]
+      summary: Pobierz wszystkie subkonta
+      responses:
+        '200':
+          description: Lista subkont
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SubaccountDTO'
+    post:
+      tags: [Subaccounts]
+      summary: Utwórz nowe subkonto
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubaccountDTO'
+      responses:
+        '201':
+          description: Subkonto utworzone
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubaccountDTO'
+
+  /prices:
+    get:
+      tags: [Prices]
+      summary: Pobierz wszystkie ceny
+      responses:
+        '200':
+          description: Lista cen
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PriceDTO'
+    post:
+      tags: [Prices]
+      summary: Dodaj pozycję cennika
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PriceDTO'
+      responses:
+        '201':
+          description: Cena dodana
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PriceDTO'
+
+  /invoices:
+    get:
+      tags: [Invoices]
+      summary: Pobierz wszystkie faktury
+      responses:
+        '200':
+          description: Lista faktur
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/InvoiceDTO'
+
+  /payments:
+    get:
+      tags: [Payments]
+      summary: Pobierz wszystkie wpłaty
+      responses:
+        '200':
+          description: Lista wpłat
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PaymentDTO'
+    post:
+      tags: [Payments]
+      summary: Zarejestruj wpłatę
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentDTO'
+      responses:
+        '201':
+          description: Wpłata zarejestrowana
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentDTO'
+
+  /billing/generate:
+    post:
+      tags: [Billing]
+      summary: Wygeneruj faktury miesięczne
+      responses:
+        '200':
+          description: Faktury wygenerowane
+
+  /billing/reminders:
+    post:
+      tags: [Billing]
+      summary: Wyślij monity dla przeterminowanych faktur
+      responses:
+        '200':
+          description: Monity wysłane
+
+  /billing/escalate:
+    post:
+      tags: [Billing]
+      summary: Eskaluj przeterminowane faktury >30 dni
+      responses:
+        '200':
+          description: Eskalacje zalogowane
+
+  /simulation:
+    post:
+      tags: [Simulation]
+      summary: Przesuń symulowany czas
+      parameters:
+        - name: days
+          in: query
+          description: Liczba dni do przesunięcia
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Data symulacji zaktualizowana
